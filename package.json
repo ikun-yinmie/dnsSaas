@@ -1,0 +1,20 @@
+{
+  "name": "dns-saas",
+  "version": "0.1.0",
+  "description": "多服务商 DNS 守护面板:绑定多个解析站、定时健康检查、逐域名独立更新、多服务商互备、优选IP SaaS 加速",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "dns-saas": "src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dry": "node src/index.js --dry-run"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "yaml": "^2.4.0"
+  }
+}

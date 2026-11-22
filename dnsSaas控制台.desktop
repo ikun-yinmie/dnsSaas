@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=dnsSaas 控制台
+GenericName=DNS 守护面板控制台
+Comment=dnsSaas 启动 / 停止 / 状态查看
+Exec=/path/to/dnsSaas/控制台.sh
+Path=/path/to/dnsSaas
+Icon=preferences-system-network
+Terminal=false
+Categories=Network;Utility;
+StartupNotify=true

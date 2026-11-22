@@ -1,0 +1,13 @@
+[Unit]
+Description=dnsSaas - 多服务商 DNS 守护面板
+After=network-online.target
+
+[Service]
+ExecStart=/usr/bin/node src/index.js --config %h/.config/dns-saas/config.yaml
+WorkingDirectory=/path/to/dnsSaas
+Restart=on-failure
+RestartSec=5
+Environment=DNS_SAAS_LOG=info
+
+[Install]
+WantedBy=default.target

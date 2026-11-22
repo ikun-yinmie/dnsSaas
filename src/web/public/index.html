@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>dnsSaas · 多服务商 DNS 守护面板</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header>
+  <div class="brand">
+    <span class="logo">⚡</span>
+    <div>
+      <h1>dnsSaas</h1>
+      <span class="sub">多服务商 DNS 守护 · 健康检查 · 互备 · 优选IP</span>
+    </div>
+  </div>
+  <nav id="tabs">
+    <button class="tab active" data-tab="dashboard">仪表盘</button>
+    <button class="tab" data-tab="domains">域名管理</button>
+    <button class="tab" data-tab="providers">服务商</button>
+    <button class="tab" data-tab="advanced">高级配置</button>
+    <button class="tab" data-tab="logs">日志</button>
+  </nav>
+  <div class="head-right">
+    <span id="dry-tag" class="pill gray hidden">DRY-RUN</span>
+    <span id="uptime" class="sub"></span>
+    <button id="logout-btn" class="btn ghost hidden">退出</button>
+  </div>
+</header>
+
+<!-- 登录遮罩 -->
+<div id="login-mask" class="mask hidden">
+  <form id="login-form" class="login-card">
+    <h2>登录 dnsSaas</h2>
+    <input id="login-pwd" type="password" placeholder="面板密码" autocomplete="current-password">
+    <button class="btn primary" type="submit">登 录</button>
+    <div id="login-err" class="err"></div>
+  </form>
+</div>
+
+<main>
+  <!-- ===== 仪表盘 ===== -->
+  <section id="tab-dashboard" class="tab-panel">
+    <div id="stats" class="stats"></div>
+
+    <div class="sec-head">
+      <h2>域名状态</h2>
+      <span class="sub">逐域名独立检测 · 互备自动切换 · 不通自动换优选IP</span>
+      <button id="btn-check-all" class="btn small">全部检测</button>
+    </div>
+    <div id="domains" class="grid">加载中…</div>
+
+    <div class="sec-head" style="margin-top:26px">
+      <h2>优选IP 池</h2>
+      <span class="sub" id="ip-meta"></span>
+      <button id="btn-test-ip" class="btn small">立即测速</button>
+    </div>
+    <div id="ip-best" class="pills">加载中…</div>
+    <details><summary>全部测速结果</summary><div id="ip-all" class="ip-all"></div></details>
+  </section>
+
+  <!-- ===== 域名管理 ===== -->
+  <section id="tab-domains" class="tab-panel hidden">
+    <div class="sec-head">
+      <h2>域名管理</h2>
+      <span class="sub">每个域名独立配置:服务商 · 记录 · TTL · 检测间隔 · 是否参与优选</span>
+      <button id="btn-add-domain" class="btn primary small">+ 添加域名</button>
+    </div>
+    <div id="domain-list" class="list">加载中…</div>
+  </section>
+
+  <!-- ===== 服务商 ===== -->
+  <section id="tab-providers" class="tab-panel hidden">
+    <div class="sec-head">
+      <h2>DNS 服务商</h2>
+      <span class="sub">可绑定多个解析站,支持启用/禁用</span>
+      <button id="btn-add-provider" class="btn primary small">+ 添加服务商</button>
+    </div>
+    <div id="provider-list" class="list">加载中…</div>
+  </section>
+
+  <!-- ===== 高级配置 ===== -->
+  <section id="tab-advanced" class="tab-panel hidden">
+    <div class="sec-head"><h2>高级配置(YAML)</h2><span class="sub">保存后自动热重载;日常修改建议用上面的表单</span></div>
+    <textarea id="config-yaml" spellcheck="false"></textarea>
+    <div class="row">
+      <button id="btn-save-config" class="btn primary">保存配置</button>
+      <button id="btn-reload-config" class="btn">放弃修改</button>
+      <span id="config-msg" class="sub"></span>
+    </div>
+  </section>
+
+  <!-- ===== 日志 ===== -->
+  <section id="tab-logs" class="tab-panel hidden">
+    <div class="sec-head"><h2>运行日志</h2><span class="sub">最近 300 条 · 每 5 秒自动刷新</span></div>
+    <pre id="logs" class="logs"></pre>
+  </section>
+</main>
+
+<footer>dnsSaas v0.2 · 域名状态每 5 秒自动刷新</footer>
+
+<!-- 模态框(域名/服务商表单) -->
+<div id="modal" class="mask hidden">
+  <div class="modal-card">
+    <h2 id="modal-title"></h2>
+    <div id="modal-body" class="form"></div>
+    <div class="modal-actions">
+      <button id="modal-cancel" class="btn">取消</button>
+      <button id="modal-save" class="btn primary">保存</button>
+    </div>
+  </div>
+</div>
+
+<div id="toasts" class="toasts"></div>
+<script src="/app.js"></script>
+</body>
+</html>

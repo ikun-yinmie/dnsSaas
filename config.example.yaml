@@ -1,0 +1,99 @@
+# dnsSaas 配置示例 —— 已按常用场景预填,改成自己的密钥即可用
+# 修改保存后自动热重载,无需重启
+
+server:
+  host: "127.0.0.1"        # 对外提供服务改为 0.0.0.0(务必设置密码)
+  port: 9877
+  password: ""             # Web 面板登录密码;为空则仅本机免密访问
+
+# ---- DNS 服务商(可绑定多个解析站,每个可单独启用/禁用)----
+providers:
+  # Cloudflare:面板 My Profile → API Tokens → 创建 Token(权限:Zone.DNS Edit)
+  - name: cf-main
+    type: cloudflare
+    enabled: true
+    token: "粘贴你的 Cloudflare API Token"
+
+  # DNSHE:my.dnshe.com → 免费域名管理 → API管理 → 创建密钥(cfsd_ 前缀)
+  - name: dnshe-main
+    type: dnshe
+    enabled: true
+    apiKey: "cfsd_xxxxxxxx"
+    apiSecret: "只显示一次的 Secret"
+    apiBase: "https://api005.dnshe.com"
+
+# ---- 域名列表(每个域名完全独立:独立检测、独立同步、互不影响)----
+domains:
+  # 例1:SaaS 加速模式 —— 通配符 * 指向大陆友好的 Cloudflare 优选IP
+  # 主:dnshe 上的 *.example.com;互备:Cloudflare 上的 *.example.net
+  - id: lsky
+    mode: saas
+    enabled: true
+    usePreferred: true       # 是否参与优选IP 分配(关闭则记录不自动变化)
+    primary:
+      provider: dnshe-main
+      subdomain: "example.com"
+      name: "*"
+      type: A
+      ttl: 600
+    backup:
+      provider: cf-main
+      zone: "example.net"
+      name: "*"
+      type: A
+      ttl: 600
+      proxied: false
+    check:
+      urls: ["https://lsky.example.net/"]   # 健康检查目标(全部通过才算可用)
+      expectStatus: [200, 301, 302]
+      intervalSec: 300       # 检测间隔(秒,10~86400)
+      failThreshold: 3       # 连续失败 N 次 → 优选IP替换 → 互备切换 → 告警
+      timeoutMs: 8000
+
+  # 例2:DDNS 模式 —— 跟随本机公网 IP(类似 ddns-go)
+  # - id: home-v6
+  #   mode: ddns
+  #   primary:
+  #     provider: cf-main
+  #     zone: "example.org"
+  #     name: "note"
+  #     type: AAAA              # AAAA 跟随 IPv6,A 跟随 IPv4
+  #     ttl: 600
+  #   check:
+  #     urls: ["https://note.example.org/"]
+  #     intervalSec: 300
+
+  # 例3:static 模式 —— 固定值
+  # - id: static-demo
+  #   mode: static
+  #   primary:
+  #     provider: dnshe-main
+  #     subdomain: "example.com"
+  #     name: "*"
+  #     type: A
+  #     values: ["104.17.172.36"]
+  #   check:
+  #     urls: ["https://wc-test.example.com/"]
+
+# ---- 优选IP(大陆友好的 Cloudflare IP 自动测速)----
+ipPool:
+  enabled: true
+  sources:
+    # 纯文本 IP 列表(每 5 分钟更新,建议加两个源凑够所需数量)
+    - "https://ip.164746.xyz/ipTop.html"
+    - "https://ip.164746.xyz/ipTop10.html"
+    # gacjie 按运营商分线路(部分网络会访问失败,失败自动跳过)
+    - "https://monitor.gacjie.cn/api/client/get_ip_address"
+  manual:                       # 手动补充的 IP
+    - "104.17.172.36"
+  testCount: 3                  # 每个 IP 测几次取中位数
+  testTimeoutMs: 2000
+  concurrency: 8
+  maxIPs: 8                     # 优选池最多保留几个 IP(分配按"需要的侧数"自动匹配)
+                                # 每个参与优选的域名主侧/备侧各占一个不同 IP,互不重复
+  intervalSec: 3600             # 测速周期
+
+# ---- 告警 ----
+notify:
+  webhook: ""                   # 所有域名不可用/互备切换时 POST JSON {title, msg, key, level}
+  cooldownSec: 1800             # 同一告警最少间隔 30 分钟
